@@ -1,5 +1,8 @@
 package com.spring.controllers;
 
+import com.spring.dto.StudentDTO;
+import com.spring.dto.StudentResponseDTO;
+import com.spring.model.School;
 import com.spring.model.Student;
 import com.spring.reposiories.StudentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,15 +12,40 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-public class FirstController {
+public class StudentController {
     private final StudentRepository repository;
     @Autowired
-    public FirstController(StudentRepository repository) {
+    public StudentController(StudentRepository repository) {
         this.repository = repository;
     }
     @PostMapping("/students")
-    public Student post(@RequestBody Student student) {
-        return repository.save(student);
+    public StudentResponseDTO post(@RequestBody StudentDTO studentdto) {
+        var student = toStudent(studentdto);
+        var savedStudent = repository.save(student);
+
+        return toStudentResponseDto(savedStudent);
+    }
+
+    private Student toStudent(StudentDTO dto) {
+        var student = new Student();
+        student.setFirstName(dto.firstName());
+        student.setLastName(dto.lastName());
+        student.setEmail(dto.email());
+
+        var school = new School();
+        school.setId(dto.schoolId());
+
+        student.setSchool(school);
+
+        return student;
+    }
+
+    private StudentResponseDTO toStudentResponseDto(Student student) {
+          return new StudentResponseDTO(
+                  student.getFirstName(),
+                  student.getLastName(),
+                  student.getEmail()
+          );
     }
 
     @GetMapping("/students")
