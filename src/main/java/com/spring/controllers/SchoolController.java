@@ -1,9 +1,7 @@
 package com.spring.controllers;
 
 import com.spring.dto.SchoolDTO;
-import com.spring.model.School;
-import com.spring.reposiories.SchoolRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.spring.service.SchoolService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,28 +12,19 @@ import java.util.stream.Collectors;
 
 @RestController
 public class SchoolController {
-    private final SchoolRepository schoolRepository;
-    @Autowired
-    public SchoolController(SchoolRepository schoolRepository) {
-        this.schoolRepository = schoolRepository;
+    private final SchoolService schoolService;
+
+    public SchoolController(SchoolService schoolService) {
+        this.schoolService = schoolService;
     }
+
     @PostMapping("/schools")
-    public SchoolDTO create(@RequestBody SchoolDTO schooldto) {
-        var school = toSchool(schooldto);
-        schoolRepository.save(school);
-        return schooldto;
+    public SchoolDTO create(@RequestBody SchoolDTO dto) {
+        return schoolService.create(dto);
     }
-    private School toSchool(SchoolDTO schooldto) {
-        return  new School(schooldto.name());
-    }
-    private SchoolDTO toSchoolDTO(School school) {
-        return new SchoolDTO(school.getName());
-    }
+
     @GetMapping("/schools")
     public List<SchoolDTO> findAll() {
-        return schoolRepository.findAll()
-                .stream()
-                .map(this::toSchoolDTO)
-                .collect(Collectors.toList());
+        return schoolService.findAll();
     }
 }
